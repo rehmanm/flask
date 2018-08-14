@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, session, redirect, flash, url_for
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from datetime import datetime
@@ -12,14 +12,23 @@ app.config['SECRET_KEY'] = 'hard to guess string'
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    name = None
     form = NameForm()
 
     if form.validate_on_submit():
-        name = form.name.data
-        form.name.data = ''
+        old_name = session.get('name')
+        if old_name is not None and old_name != form.name.data:
+            flash("You have changed your name")
+            
+        session['name'] = form.name.data
+        return redirect(url_for('index'))   
 
-    return render_template("index.html", current_time = datetime.utcnow(), form=form, name = name)
+    return render_template("index.html", current_time = datetime.utcnow(), form=form, name = session.get('name'))
+
+@app.route('/logout')
+def logout():
+   # remove the username from the session if it is there
+   session.pop('name', None)
+   return redirect(url_for('index'))
 
 @app.route('/user/<name>')
 def user(name):

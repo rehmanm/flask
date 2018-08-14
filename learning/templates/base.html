@@ -13,6 +13,8 @@
 
     <div class="navbar navbar-inverse" role="navigation">
         <div class="container">
+           
+
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toogle="collapse" data-target=".navbar-collapse">
                     <span class="sr-only">Toogle Navigation</span>
@@ -24,8 +26,11 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="/">Home</a></li> "
-                    <li><a href= '{{ url_for("user", name="rehman") }}'>Rehman</a></li> 
+                    <li><a href="/">Home</a></li> 
+                    {% if "name" in session %}
+                        <li><a href= '{{ url_for("user", name=session.get("name")) }}'>{{session.get("name")}}</a></li> 
+                    {% endif %}
+                    <li><a href="/logout">Logout</a></li> 
                 </ul>
             </div>
         </div>
@@ -43,6 +48,15 @@
 {% block content %}
 
 <div class="container">
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning">
+            <button type="button" class="close" data-dismiss="alert">&times;
+                
+            </button>
+            {{message}}
+        </div>
+
+        {%endfor%}
     {% block page_content %} {% endblock %}
 
 </div>
