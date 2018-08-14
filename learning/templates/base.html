@@ -2,6 +2,13 @@
 
 {% block title %}Flask App {% endblock %}
 
+{% block head %}
+{{ super() }}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+{% endblock %}
+
+
 {% block navbar%}
 
     <div class="navbar navbar-inverse" role="navigation">
@@ -17,8 +24,8 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="/">Home</a></li> 
-                    
+                    <li><a href="/">Home</a></li> "
+                    <li><a href= '{{ url_for("user", name="rehman") }}'>Rehman</a></li> 
                 </ul>
             </div>
         </div>
@@ -26,6 +33,12 @@
 
 {% endblock %}
 
+
+{% block scripts %}
+{{ super() }}
+{{ moment.include_moment() }}
+{{ moment.locale('ur') }}
+{% endblock %}
 
 {% block content %}
 
