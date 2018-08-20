@@ -2,7 +2,7 @@ from flask import Flask, render_template, session, redirect, flash, url_for
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from datetime import datetime
-
+from flask_migrate import Migrate
 from NameForm import NameForm
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -19,7 +19,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 moment = Moment(app)
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
-
+migrate = Migrate(app, db)
 
 
 class Role(db.Model):

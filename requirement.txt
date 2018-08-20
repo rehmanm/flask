@@ -1,6 +1,7 @@
 flask
 flask-bootstrap
 pylint
-flask_moment
+flask-moment
 flask-wtf
 flask-sqlalchemy
+flask-migrate
