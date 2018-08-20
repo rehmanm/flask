@@ -7,23 +7,26 @@ from NameForm import NameForm
 from flask_sqlalchemy import SQLAlchemy
 import os
 
-app = Flask(__name__)
-moment = Moment(app)
-bootstrap = Bootstrap(app)
-db = SQLAlchemy(app)
-
 basedir = os.path.abspath(os.path.dirname(__file__))
+print('sqlite:///' + os.path.join(basedir, 'data.sqlite'))
+app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'hard to guess string'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-print(basedir)
+
+moment = Moment(app)
+bootstrap = Bootstrap(app)
+db = SQLAlchemy(app)
+
+
+
 class Role(db.Model):
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=True)
-    users = db.relationship('User', backref='role')
+    users = db.relationship('User', backref='role', lazy='dynamic')
 
     def __repr__(self):
         return '<Role %r>' % self.name
@@ -39,24 +42,42 @@ class User(db.Model):
         return '<User %r>' % self.username
 
 
+@app.shell_context_processor
+def make_shell_context():
+    return dict(db=db, User=User, Role=Role)
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     form = NameForm()
 
     if form.validate_on_submit():
-        old_name = session.get('name')
-        if old_name is not None and old_name != form.name.data:
-            flash("You have changed your name")
-            
+        user = User.query.filter_by(username=form.name.data).first()
+        print('user', user)
+        if user is None:
+            print('new user')
+            user = User(username=form.name.data)
+            db.session.add(user)
+            db.session.commit()
+            session['known'] = False
+        else:
+            session['known'] = True
+
         session['name'] = form.name.data
+        form.name.data = '' 
         return redirect(url_for('index'))   
 
-    return render_template("index.html", current_time = datetime.utcnow(), form=form, name = session.get('name'))
+    return render_template("index.html",
+     current_time = datetime.utcnow(), 
+     form=form, 
+     name = session.get('name'),
+     known = session.get('known', False))
 
 @app.route('/logout')
 def logout():
    # remove the username from the session if it is there
    session.pop('name', None)
+   session.pop('known', False)
+   
    return redirect(url_for('index'))
 
 @app.route('/user/<name>')
